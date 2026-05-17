@@ -1,0 +1,503 @@
+# config/rules.yaml - WorAI Intent Registry v2.3.1
+# Priority: 10=สูงสุด 1=ต่ำสุด | Router จะเลือก intent ที่ confidence สูงสุด + priority สูงสุด
+
+# ========== Priority 10: Critical System ==========
+- intent: greeting
+  patterns: 
+    - "^(สวัสดี|หวัดดี|hi|hello|ดีจ้า|โย่ว|ทักทาย|ฮัลโหล|ไง|สบายดีไหม)$"
+    - ".*(สวัสดี|หวัดดี).*ครับ.*"
+    - ".*(สวัสดี|หวัดดี).*ค่ะ.*"
+  match_any: true
+  confidence_boost: 0.99
+  route: direct
+  tools: []
+  priority: 10
+
+- intent: farewell
+  patterns:
+    - "^(บ๊ายบาย|ลาก่อน|ไปละ|โชคดี|goodbye|bye|see you|เจอกัน).*"
+    - ".*(ไว้เจอกัน|ลาไปก่อน).*"
+  match_any: true
+  confidence_boost: 0.98
+  route: direct
+  tools: []
+  priority: 10
+
+- intent: gratitude
+  patterns:
+    - "^(ขอบคุณ|ขอบใจ|thanks|thank you|ขอบพระคุณ).*"
+    - ".*ใจดีจัง.*"
+    - ".*ช่วยได้เยอะเลย.*"
+  match_any: true
+  confidence_boost: 0.98
+  route: direct
+  tools: []
+  priority: 10
+
+- intent: escalate_handoff
+  patterns: 
+    - "(คุยกับคน|เจ้าหน้าที่|human|ติดต่อคน|คนจริง|แอดมิน|พนักงาน)"
+    - ".*ไม่อยากคุยกับบอท.*"
+    - ".*ต้องการคุยกับมนุษย์.*"
+  match_any: true
+  confidence_boost: 0.95
+  route: human_handoff
+  tools: []
+  priority: 10
+
+# ========== Priority 9: High Precision Tools ==========
+- intent: astrology_analysis
+  patterns:
+    - ".*(ผูก|วิเคราะห์|ดู|อ่าน|เช็ค|ทำนาย).*(ดวง|horoscope|astrology|ชะตา|พื้นดวง|โชคชะตา).*"
+    - ".*(bazi|ba zi|八字|สี่เสา|จีน|western|vedic|jyotish|อินเดีย|สากล|ดวงไทย).*"
+    - ".*(วันเกิด|เวลาเกิด|birth chart|natal chart|สถานที่เกิด).*"
+    - "^(ดวง|horoscope|astrology|bazi|western|vedic).*"
+  match_any: true
+  confidence_boost: 0.95
+  route: tool_only
+  tools: [astrology_analyzer]
+  priority: 9
+
+- intent: name_numerology
+  patterns:
+    - ".*(วิเคราะห์|ดู|ตรวจ|เช็ค|ทำนาย).*(ชื่อ|นามสกุล|เลขศาสตร์|เลขชื่อ).*"
+    - ".*(ชื่อ|นามสกุล).*(เป็นเลข|ได้เลข|เท่าไหร่|กี่|ค่า|ตัวเลข|มงคลไหม).*"
+    - "^(เลขศาสตร์|เลขชื่อ|numerology|name number).*"
+  match_any: true
+  confidence_boost: 0.95
+  route: tool_only
+  tools: [name_analyzer]
+  priority: 9
+
+- intent: system_time
+  patterns:
+    - ".*(กี่โมง|เวลาเท่าไหร่|เช็คเวลา).*"
+    - ".*เวลา.*ตอนนี้.*"
+  match_any: true
+  confidence_boost: 0.95
+  route: direct
+  tools: []
+  priority: 9
+
+- intent: system_status
+  patterns:
+    - ".*สถานะระบบ.*"
+    - ".*ระบบ.*เป็นไงบ้าง.*"
+  match_any: true
+  confidence_boost: 0.95
+  route: direct
+  tools: []
+  priority: 9
+
+- intent: compute_simple
+  patterns:
+    - "^(คำนวณ|คิดเลข|บวก|ลบ|คูณ|หาร)\\s+.*"
+    - ".*[0-9]+\\s*[+\\-*/^%]\\s*[0-9]+.*"
+    - ".*เท่ากับเท่าไหร่.*"
+    - "^[0-9+\\-*/(). ]+$"
+    - "(?<!PM)[0-9]+\\.[0-9]+" # เลขทศนิยม (ยกเว้น PM2.5)
+    - ".*[0-9]+\\.[0-9]+\\s*[><=]\\s*[0-9]+\\.[0-9]+.*" # 9.8>9.11
+    - ".*(ถอดราก|สแควรูท|root|sqrt).*"
+  match_any: true
+  confidence_boost: 0.90
+  route: tool_only
+  tools: [math]
+  priority: 9
+
+- intent: search_knowledge
+  patterns:
+    - "^(อากาศ|สภาพอากาศ|อุณหภูมิ|PM2.5|ฝุ่น|แดด|ฝน).*(เป็นไง|เท่าไหร่|กี่องศา|ตอนนี้|วันนี้)"
+    - ".*(ฝนตก|แดดออก|หนาวไหม|ร้อนไหม).*วันนี้.*"
+    - ".*(เวลา|กี่โมง|ไทม์โซน).*(ที่|ใน).*"
+    - ".*(PM2\\.5|ฝุ่น).*เท่าไหร่.*"
+  match_any: true
+  confidence_boost: 0.92
+  route: tool_only
+  tools: [fact_retriever]
+  priority: 9
+
+- intent: qa_tax_calculation
+  patterns:
+    - ".*(คำนวณ|คิด|เสีย|ยื่น).*(ภาษี|tax|ภงด).*"
+    - ".*รายได้.*(ต้องเสียภาษี|เท่าไหร่).*"
+    - "^ภาษี.*"
+    - ".*(ลดหย่อน|ค่าใช้จ่าย|รายได้สุทธิ).*"
+  match_any: true
+  confidence_boost: 0.90
+  route: tool_only
+  tools: [tax_calculator]
+  priority: 9
+
+- intent: knowledge_synthesize
+  patterns:
+    - ".*(สังเคราะห์|สรุป|เรียนรู้|วิจัย).*(ความรู้|insight|กฎ|rules|องค์ความรู้).*"
+    - ".*สรุป.*(logs|จากแชท|การสนทนา).*"
+    - ".*(หาแพทเทิร์น|หาความเชื่อมโยง).*"
+  match_any: true
+  confidence_boost: 0.92
+  route: tool_only
+  tools: [knowledge_synthesizer]
+  priority: 9
+
+- intent: qa_comparative
+  patterns:
+    - "^(เปรียบเทียบ|เทียบ|compare)\\s+.*"
+    - ".*\\s+(vs|versus|กับ|เปรียบเทียบกับ)\\s+.*"
+    - ".*(ดีกว่า|แย่กว่า|ต่างกัน|แตกต่าง).*(ไหม|ยังไง|อะไร|อย่างไร)"
+    - ".*(อันไหนดีกว่า|เลือกอันไหน|ต่างกันยังไง).*"
+  match_any: true
+  confidence_boost: 0.90
+  route: tool_then_llm
+  tools: [comparator]
+  priority: 9
+
+- intent: qa_opinion
+  patterns:
+    - "^(ขอ)?.*ความคิดเห็น.*"
+    - ".*(คิดว่าไง|คิดยังไง|เห็นว่ายังไง|มีความเห็นอย่างไร).*"
+    - ".*(ดีไหม|ควรไหม|น่าใช้ไหม|น่าซื้อไหม|คุ้มไหม|ดีหรือเปล่า).*"
+    - "^รีวิว.*"
+    - ".*(แนะนำหน่อย|แนะนำ.*ดี|เลือกอะไรดี).*"
+  match_any: true
+  confidence_boost: 0.90
+  route: llm_summary
+  tools: []
+  priority: 9
+
+- intent: compute_currency
+  patterns:
+    - ".*(แปลงเงิน|แลกเงิน|ค่าเงิน).*"
+    - ".*([0-9]+)\\s*(ดอลลาร์|usd|บาท|thb|เยน|jpy|หยวน|cny).*(เป็น|เท่ากับ).*"
+  match_any: true
+  confidence_boost: 0.92
+  route: tool_only
+  tools: [math]
+  priority: 9
+
+- intent: compute_unit
+  patterns:
+    - ".*(แปลงหน่วย|กี่เมตร|กี่กิโล|กี่นิ้ว).*"
+    - ".*([0-9]+)\\s*(เมตร|m|กิโล|km|ไมล์|นิ้ว).*(เป็น|เท่ากับ).*"
+  match_any: true
+  confidence_boost: 0.92
+  route: tool_only
+  tools: [math]
+  priority: 9
+
+# ========== Priority 8: Standard Tools ==========
+- intent: compute_advanced
+  patterns:
+    - ".*(อินทิเกรต|ดิฟ|อนุพันธ์|สมการเชิงซ้อน|เมทริกซ์|แคลคูลัส|สถิติ|ล็อกการิทึม).*"
+    - ".*แก้สมการ.*\\^.*"
+    - ".*x\\*\\*2.*" # จับ x**2
+    - ".*(cos|sin|tan|log|ln|exp).*"
+  match_any: true
+  confidence_boost: 0.90
+  route: tool_only
+  tools: [math_advanced]
+  priority: 8
+
+- intent: qa_calculation
+  patterns:
+    - ".*(กี่เปอร์เซ็นต์|กี่บาท|ราคาเท่าไหร่|ส่วนลด|ดอกเบี้ย|กำไร|ขาดทุน).*(คำนวณ|คิด).*"
+    - ".*ถ้า.*แล้ว.*เท่าไหร่.*"
+    - ".*(พื้นที่|ปริมาตร|น้ำหนัก|ความยาว).*"
+  match_any: true
+  confidence_boost: 0.85
+  route: tool_only
+  tools: [math]
+  priority: 8
+
+- intent: qa_logic
+  patterns:
+    - ".*(ตรรกะ|สมเหตุสมผล|เหตุผล).*"
+    - ".*ถ้า A เป็น B แล้ว.*"
+    - ".*(แก้โจทย์|ทายปริศนา).*"
+  match_any: true
+  confidence_boost: 0.88
+  route: tool_only
+  tools: [logic]
+  priority: 8
+
+- intent: qa_analytical
+  patterns:
+    - "^(วิเคราะห์|ทำไม|เพราะอะไร|สาเหตุ|เจาะลึก).+"
+    - ".*(ส่งผล|ผลกระทบ|แนวโน้ม|อนาคต|ความเป็นไปได้).*"
+    - ".*(ข้อดีข้อเสีย|จุดแข็งจุดอ่อน|SWOT|โอกาสและอุปสรรค).*"
+  match_any: true
+  confidence_boost: 0.88
+  route: tool_then_llm
+  tools: [analyzer]
+  priority: 8
+
+- intent: name_numerology
+  patterns:
+    - ".*(วิเคราะห์|ดู|ตรวจ|เช็ค|ทำนาย).*(ชื่อ|นามสกุล|เลขศาสตร์|เลขชื่อ).*"
+    - ".*(ชื่อ|นามสกุล).*(เป็นเลข|ได้เลข|เท่าไหร่|กี่|ค่า|ตัวเลข|มงคลไหม).*"
+    - "^(เลขศาสตร์|เลขชื่อ|numerology|name number).*"
+  match_any: true
+  confidence_boost: 0.85
+  route: tool_only
+  tools: [name_analyzer]
+  priority: 8
+
+
+- intent: astrology_analysis
+  patterns:
+    - ".*(ผูก|วิเคราะห์|ดู|อ่าน|เช็ค|ทำนาย).*(ดวง|horoscope|astrology|ชะตา|พื้นดวง|โชคชะตา).*"
+    - ".*(bazi|ba zi|八字|สี่เสา|จีน|western|vedic|jyotish|อินเดีย|สากล|ดวงไทย).*"
+    - ".*(วันเกิด|เวลาเกิด|birth chart|natal chart|สถานที่เกิด).*"
+    - "^(ดวง|horoscope|astrology|bazi|western|vedic).*"
+  match_any: true
+  confidence_boost: 0.82
+  route: tool_only
+  tools: [astrology_analyzer]
+  priority: 8
+
+- intent: qa_factual
+  patterns:
+    - ".*คืออะไร$"
+    - "^(ใคร|อะไร|ที่ไหน|เมื่อไหร่|ทำไม|อย่างไร|คืออะไร)\\s+.*"
+    - ".*(กี่|เท่าไหร่|เท่าไร|จำนวน).*(คน|อัน|บาท|ครั้ง).*"
+    - "^(นิยาม|ความหมาย|คำอธิบาย).+"
+  match_any: true
+  confidence_boost: 0.80
+  route: tool_only
+  tools: [fact_retriever]
+  priority: 8
+
+# ========== Priority 7: Search & Workflow ==========
+- intent: search_web
+  patterns:
+    - "^(หา|ค้นหา|เสิร์ช|เช็ค).*(ในเน็ต|ในเว็บ|google|ออนไลน์|เว็บไซต์).*"
+    - "^(find|search|google)\\s+.*"
+    - ".*(ข่าว|ล่าสุด|วันนี้|ตอนนี้|สถานการณ์).*"
+    - ".*(ราคา|หุ้น|ค่าเงิน|ทอง).*(ปัจจุบัน|เรียลไทม์|วันนี้).*"
+  match_any: true
+  confidence_boost: 0.80
+  route: tool_only
+  tools: [web_search]
+  priority: 7
+
+- intent: search_news
+  patterns:
+    - ".*(ข่าววันนี้|ข่าวล่าสุด|อัปเดตข่าว).*"
+    - "^news.*"
+  match_any: true
+  confidence_boost: 0.85
+  route: tool_only
+  tools: [web_search]
+  priority: 7
+
+- intent: search_history
+  patterns:
+    - ".*(ที่เคยคุย|ประวัติ|ครั้งก่อน|เมื่อกี้|เมื่อวาน|ที่ถามเมื่อวาน).*"
+    - ".*(ย้อนหลัง|เก่าๆ|ที่ถามไป|บันทึกการคุย).*"
+  match_any: true
+  confidence_boost: 0.75
+  route: tool_only
+  tools: [history_search]
+  priority: 7
+
+- intent: workflow_action
+  patterns:
+    - "^(สร้าง|เปิด|แจ้ง|เปิดเคส).*(ตั๋ว|งาน|task|ticket|เคส|ใบสั่งงาน).*"
+    - ".*(เครื่องเสีย|แจ้งซ่อม|มีปัญหา|เสีย|พัง|ใช้ไม่ได้|เข้าไม่ได้).*"
+    - ".*(ขอ|ต้องการ).*(ซ่อม|แก้ไข|ช่วยเหลือ|ซัพพอร์ต).*"
+  match_any: true
+  confidence_boost: 0.80
+  route: tool_only
+  tools: [workflow_executor]
+  priority: 7
+
+- intent: workflow_update
+  patterns:
+    - ".*(อัพเดท|แก้ไข|เปลี่ยน|ปรับ|โน้ตเพิ่ม).*(ตั๋ว|งาน|task|สถานะ|รายละเอียด).*"
+    - ".*เพิ่ม.*(ข้อมูล|รายละเอียด).*(ในตั๋ว|ในงาน|ในเคส).*"
+  match_any: true
+  confidence_boost: 0.78
+  route: tool_only
+  tools: [workflow_executor]
+  priority: 7
+
+- intent: workflow_status
+  patterns:
+    - ".*(สถานะ|ถึงไหน|เสร็จยัง|คืบหน้า|อยู่ขั้นไหน).*(ตั๋ว|งาน|task|เคส).*"
+    - "^เช็ค.*งาน.*"
+    - ".*งาน.*(เบอร์|เลข|ไอดี|id).*[0-9]+.*"
+  match_any: true
+  confidence_boost: 0.78
+  route: tool_only
+  tools: [workflow_executor]
+  priority: 7
+
+- intent: workflow_assign
+  patterns:
+    - ".*(มอบหมาย|ให้|assign|ส่งต่อ|รับผิดชอบ).*(งาน|ตั๋ว|เคส).*(ให้|กับ|แก่|โดย).*"
+  match_any: true
+  confidence_boost: 0.78
+  route: tool_only
+  tools: [workflow_executor]
+  priority: 7
+
+# ========== Priority 6: Document & System ==========
+- intent: send_communicate
+  patterns:
+    - "^(ส่ง|เมล|email|ไลน์|line|แจ้ง|บอก|แชท).*(ให้|บอก|หา|ถึง|ยัง).*"
+    - ".*(ฝากบอก|แจ้งให้ทราบ|เตือนบอก).*"
+    - ".*(ตอบกลับ|ส่งข้อความ).*"
+  match_any: true
+  confidence_boost: 0.80
+  route: tool_only
+  tools: [action_executor]
+  priority: 6
+
+- intent: send_schedule
+  patterns:
+    - ".*(นัด|ประชุม|meeting|นัดหมาย|จอง|ตารางเวลา).*(กับ|เวลา|วัน|ช่วง).*"
+    - ".*(ว่างไหม|ว่างวันไหน|สะดวก|ว่างช่วงไหน).*"
+    - ".*(จองห้อง|จองคิว|ลงปฏิทิน).*"
+  match_any: true
+  confidence_boost: 0.78
+  route: tool_only
+  tools: [calendar]
+  priority: 6
+
+- intent: send_reminder
+  patterns:
+    - ".*(เตือน|reminder|แจ้งเตือน|ปลุก|ย้ำ).*(ฉัน|ให้|หน่อย|ตอน|เมื่อ).*"
+    - ".*อย่าลืม.*"
+    - ".*(อีก|ใน).*[0-9]+.*(นาที|ชั่วโมง|วัน|สัปดาห์).*เตือน.*"
+  match_any: true
+  confidence_boost: 0.78
+  route: tool_only
+  tools: [reminder]
+  priority: 6
+
+- intent: doc_summarize
+  patterns:
+    - ".*(สรุป|ย่อ|สรุปใจความ|จับใจความ).*(ไฟล์|เอกสาร|pdf|doc|docx|txt|กระดาษ).*"
+    - "^สรุป.*(ยาว|สั้น).*"
+  match_any: true
+  confidence_boost: 0.80
+  route: tool_then_llm
+  tools: [file_parser]
+  priority: 6
+
+- intent: doc_extract
+  patterns:
+    - ".*(ดึง|หา|เอา|สกัด).*(ข้อมูล|เลข|ชื่อ|เบอร์|อีเมล|พอยต์).*(จากไฟล์|ในเอกสาร|ในรูป).*"
+    - ".*ไฟล์.*มี.*(อะไร|กี่หน้า|กี่บรรทัด).*"
+  match_any: true
+  confidence_boost: 0.78
+  route: tool_only
+  tools: [file_parser]
+  priority: 6
+
+- intent: doc_translate
+  patterns:
+    - ".*(แปล|translate|เปลี่ยนภาษา).*(ไฟล์|เอกสาร|ข้อความ|ภาษา|คำ).*(เป็น|ไทย|อังกฤษ|ญี่ปุ่น|จีน).*"
+  match_any: true
+  confidence_boost: 0.78
+  route: tool_only
+  tools: [translator]
+  priority: 6
+
+- intent: help_guide
+  patterns:
+    - ".*(ช่วยเหลือ|สอน|วิธีใช้|ใช้อะไรได้บ้าง|คู่มือ).*"
+    - "^help$"
+  match_any: true
+  confidence_boost: 0.85
+  route: tool_only
+  tools: [fact_retriever]
+  priority: 8
+
+- intent: system_capabilities
+  patterns:
+    - ".*(ทำอะไรได้บ้าง|ฟีเจอร์|ความสามารถ).*"
+  match_any: true
+  confidence_boost: 0.85
+  route: tool_only
+  tools: [fact_retriever]
+  priority: 8
+
+# ========== Priority 5: Code & LLM ==========
+- intent: code_explain
+  patterns:
+    - ".*(อธิบาย|แปล|หมายความว่า|ทำอะไร|ไล่โค้ด).*(โค้ด|code|โปรแกรม|ฟังก์ชัน|บรรทัดนี้).*"
+    - "^โค้ดนี้.*(ทำงานยังไง|คืออะไร).*"
+  match_any: true
+  confidence_boost: 0.80
+  route: llm_summary
+  tools: []
+  priority: 5
+
+- intent: code_generate
+  patterns:
+    - ".*(เขียน|สร้าง|gen|generate|ขอตัวอย่าง).*(โค้ด|code|ฟังก์ชัน|โปรแกรม|script|คลาส).*(ภาษา|python|javascript|java|html|css|c\\+\\+).*"
+    - ".*โค้ด.*(ทำ|สำหรับ|ช่วย|จัดการ).*"
+  match_any: true
+  confidence_boost: 0.80
+  route: llm_summary
+  tools: []
+  priority: 5
+
+- intent: code_debug
+  patterns:
+    - ".*(แก้บัค|error|เออเร่อ|ทำไมรันไม่ได้).*"
+    - ".*(debug|หาจุดผิด).*"
+  match_any: true
+  confidence_boost: 0.82
+  route: llm_summary
+  tools: []
+  priority: 5
+
+- intent: personality_joke
+  patterns:
+    - ".*(เล่าเรื่องตลก|ตลกหน่อย|คลายเครียด|ขำๆ).*"
+    - ".*(joke|เรื่องขำ).*"
+  match_any: true
+  confidence_boost: 0.85
+  route: llm_summary
+  tools: []
+  priority: 5
+
+- intent: search_recipe
+  patterns:
+    - ".*(วิธีทำ|สูตร|ทำอาหาร|เมนู).*"
+    - ".*แกง.*ทำยังไง.*"
+  match_any: true
+  confidence_boost: 0.80
+  route: llm_summary
+  tools: []
+  priority: 5
+
+# ========== Priority 4: Fallback & Chat ==========
+- intent: personality_chat
+  patterns:
+    - ".*(คุยกัน|เหงา|เป็นไงบ้าง|กินข้าวยัง).*"
+  match_any: true
+  confidence_boost: 0.65
+  route: direct
+  tools: []
+  priority: 4
+
+- intent: clarify
+  patterns:
+    - ".*(ไม่เข้าใจ|งง|หมายความว่า|อะไรนะ|อธิบายใหม่|พูดใหม่|ห้ะ).*"
+    - ".*(ไม่เคลียร์|งงๆ|ไม่แน่ใจ|หมายถึงอะไร).*"
+  match_any: true
+  confidence_boost: 0.70
+  route: clarifier
+  tools: []
+  priority: 4
+
+# ========== Priority 1: Catch All ==========
+- intent: unknown
+  patterns: [".*"]
+  match_any: true
+  confidence_boost: 0.1
+  route: clarifier
+  tools: []
+  priority: 1

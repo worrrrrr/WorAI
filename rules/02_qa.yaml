@@ -1,0 +1,23 @@
+- intent: "qa_factual"
+  patterns: ["ความยาว.*แม่น้ำ.*เท่าไร", "เมื่อไหร่.*ก่อตั้ง.*บริษัท", "ใคร.*เป็น.*CEO", "what is.*fact", "when.*first.*released"]
+  match_any: true
+  confidence_boost: 0.95
+  route: "direct"
+  tools: ["fact_retriever"]
+  priority: 9
+
+- intent: "qa_opinion"
+  patterns: ["(คุณคิดอย่างไร).*", "(ควร|ดีกว่า|แนะนำให้).*", "do you think.*", "(อย่างไรดี|แบบไหนดี).*"]
+  match_any: true
+  confidence_boost: 0.90
+  route: "llm_summary"
+  tools: []
+  priority: 8
+
+- intent: "qa_comparative"
+  patterns: [".*ต่างกัน.*อย่างไร", ".*ดีกว่า.*หรือ.*", ".*มีข้อดีข้อเสีย.*", "compare.*versus.*", "which.*better.*"]
+  match_any: true
+  confidence_boost: 0.92
+  route: "tool_then_llm"
+  tools: ["comparator"]
+  priority: 8

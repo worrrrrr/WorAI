@@ -1,0 +1,31 @@
+- intent: "code_generate"
+  patterns: ["เขียนโค้ด.*ให้ที", "สร้าง.*function.*ให้ที", "generate.*code.*for.*", "make.*script.*to.*"]
+  match_any: true
+  confidence_boost: 0.91
+  route: "tool_then_llm"
+  tools: ["code_generator"]
+  priority: 8
+
+- intent: "code_debug"
+  patterns: ["แก้.*error.*", "มีปัญหา.*error.*", "stacktrace.*อะไรผิด", "debug this code", "error.*in.*this.*"]
+  match_any: true
+  confidence_boost: 0.92
+  route: "tool_then_llm"
+  tools: ["code_analyzer", "bug_finder"]
+  priority: 8
+
+- intent: "data_analyze"
+  patterns: ["วิเคราะห์.*ชุดข้อมูล.*", "หาความสัมพันธ์.*ระหว่าง.*", "statistical analysis.*of.*", "correlation.*between.*"]
+  match_any: true
+  confidence_boost: 0.87
+  route: "tool_then_llm"
+  tools: ["data_analyzer"]
+  priority: 7
+
+- intent: "data_visualize"
+  patterns: ["สร้าง.*กราฟ.*จาก.*", "plot.*the.*data", "draw.*chart.*of.*", "visualization.*for.*the.*"]
+  match_any: true
+  confidence_boost: 0.86
+  route: "tool_only"
+  tools: ["visualizer"]
+  priority: 7

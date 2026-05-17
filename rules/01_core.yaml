@@ -1,0 +1,115 @@
+- intent: "compute_simple"
+  patterns:
+    - "คำนวณ.*"
+    - "รวม.*เท่าไร"
+    - "เฉลี่ย.*"
+    - "calculate.*"
+    - "total.*of.*"
+    - "แก้สมการ.*"
+    - "ลดรูป.*"
+    - '[\d\s+\-*/.%()]+'
+    - "หาค่า.*"
+  match_any: true
+  confidence_boost: 0.95
+  route: "tool_only"
+  tools: ["math"] # แก้จาก calculate -> math
+  priority: 10
+
+- intent: "logic_evaluate"
+  patterns:
+    - "ตรรกะ.*" # เหลือแค่นี้พอ ห้ามเอา regex ตัวเลขมา
+    - ".*\b(AND|OR|NOT|XOR|IFF|NAND|NOR|IMPLIES)\b.*"
+    - ".*\b(TRUE|FALSE)\b.*"
+    - ".*(->|<->).*"
+    - ".*knight.*"
+    - ".*knave.*"
+    - ".*อัศวิน.*"
+    - ".*คนโกหก.*"
+  match_any: true
+  confidence_boost: 0.95
+  route: "tool_only"
+  tools: ["logic"]
+  priority: 11 # ให้ priority สูงกว่า math ถ้ามีคำว่า ตรรกะ
+
+- intent: "search_any"
+  patterns:
+    - "หา.*ข้อมูล.*"
+    - "ค้นหา.*"
+    - ".*คืออะไร"
+    - "ใคร.*เป็น.*"
+    - "เมื่อไหร่.*"
+    - "อากาศ.*เป็นไง"
+    - ".*ฝน.*"
+    - ".*อุณหภูมิ.*"
+    - ".*กี่องศา.*"
+    - ".*สภาพอากาศ.*"
+    - "find.*"
+    - "search.*"
+    - "what is.*"
+  match_any: true
+  confidence_boost: 0.90
+  route: "tool_only"
+  tools: ["fact_retriever","web_search"]
+  priority: 9
+
+- intent: "action_request"
+  patterns:
+    - "ช่วย.*ให้ที"
+    - "ทำให้หน่อย"
+    - "จอง.*"
+    - "เปิด.*"
+    - "ปิด.*"
+    - "ส่ง.*"
+    - "สร้าง.*"
+    - "do.*for me"
+  match_any: true
+  confidence_boost: 0.88
+  route: "tool_only"
+  tools: ["action_executor"]
+  priority: 8
+
+- intent: "workflow_action"
+  patterns:
+    - "สร้างตั๋ว.*"
+    - "เปิดเคส.*"
+    - "ticket.*"
+  match_any: true
+  confidence_boost: 0.88
+  route: "tool_only"
+  tools: ["workflow_executor"]
+  priority: 8
+
+- intent: "escalate_handoff"
+  patterns:
+    - "ขอ.*คุยกับ.*คน"
+    - "ส่งต่อ.*ให้.*ฝ่าย"
+    - "ไม่พอใจ.*"
+    - "human.*help"
+    - "talk to.*person"
+  match_any: true
+  confidence_boost: 0.95
+  route: "human_handoff"
+  tools: []
+  priority: 7
+
+- intent: "greeting"
+  patterns:
+    - "สวัสดี.*"
+    - "หวัดดี.*"
+    - "hello.*"
+    - "hi.*"
+  match_any: true
+  confidence_boost: 0.99
+  route: "direct"
+  tools: []
+  priority: 10
+
+- intent: "clarify_or_handoff"
+  patterns:
+    - ".*"
+  match_any: true
+  confidence_boost: 0.1
+  route: "clarifier"
+  tools: []
+  priority: 1
+  note: "Fallback - วางท้ายสุด!"

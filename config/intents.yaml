@@ -1,0 +1,392 @@
+# config/intents.yaml - WorAI Intent Registry v2.3
+
+# === Core 5 ===
+- code: greeting
+  name: ทักทาย
+  route: direct
+  required_tools: []
+  output_schema: [response]
+  needs_clarification: false
+
+- code: farewell
+  name: บอกลา
+  route: direct
+  required_tools: []
+  output_schema: [response]
+  needs_clarification: false
+
+- code: gratitude
+  name: ขอบคุณ
+  route: direct
+  required_tools: []
+  output_schema: [response]
+  needs_clarification: false
+
+- code: escalate_handoff
+  name: ส่งต่อให้คน
+  route: human_handoff
+  required_tools: []
+  output_schema: [message]
+  needs_clarification: false
+
+- code: clarify
+  name: ถามเพิ่ม
+  route: clarifier
+  required_tools: []
+  output_schema: [question]
+  needs_clarification: true
+
+# === QA 7 ===
+- code: qa_factual
+  name: ถามข้อมูลตรง
+  route: tool_only
+  required_tools: [fact_retriever]
+  output_schema: [answer, source]
+  needs_clarification: false
+
+- code: qa_opinion
+  name: ขอความคิดเห็น
+  route: llm_summary
+  required_tools: []
+  output_schema: [opinion, reasons]
+  needs_clarification: false
+
+- code: qa_comparative
+  name: เปรียบเทียบ
+  route: tool_then_llm
+  required_tools: [comparator]
+  output_schema: [compare_table, summary]
+  needs_clarification: false
+
+- code: qa_analytical
+  name: วิเคราะห์
+  route: tool_then_llm
+  required_tools: [analyzer]
+  output_schema: [analysis, insight]
+  needs_clarification: false
+
+- code: qa_calculation
+  name: ถามคำนวณ
+  route: tool_only
+  required_tools: [math]
+  output_schema: [result, formula]
+  needs_clarification: false
+
+- code: qa_logic
+  name: ถามเชิงตรรกะ
+  route: tool_only
+  required_tools: [logic]
+  output_schema: [reasoning, conclusion]
+  needs_clarification: false
+
+- code: qa_philosophical
+  name: คำถามเชิงปรัชญา
+  route: llm_summary
+  required_tools: []
+  output_schema: [reflection]
+  needs_clarification: false
+
+# === Search 5 ===
+- code: search_web
+  name: ค้นเว็บ
+  route: tool_only
+  required_tools: [web_search]
+  output_schema: [links, snippet]
+  needs_clarification: false
+
+- code: search_knowledge
+  name: ค้นคลังความรู้
+  route: tool_only
+  required_tools: [fact_retriever]
+  output_schema: [answer, source]
+  needs_clarification: false
+
+- code: search_history
+  name: ค้นประวัติ
+  route: tool_only
+  required_tools: [history_search]
+  output_schema: [conversations]
+  needs_clarification: false
+
+- code: search_news
+  name: ค้นข่าวสาร
+  route: tool_only
+  required_tools: [web_search]
+  output_schema: [news_items]
+  needs_clarification: false
+
+- code: search_recipe
+  name: หาสูตรอาหาร
+  route: llm_summary
+  required_tools: []
+  output_schema: [recipe, steps]
+  needs_clarification: false
+
+# === Compute 4 ===
+- code: compute_simple
+  name: คำนวณง่าย
+  route: tool_only
+  required_tools: [math]
+  output_schema: [result]
+  needs_clarification: false
+
+- code: compute_advanced
+  name: คำนวณซับซ้อน
+  route: tool_only
+  required_tools: [math_advanced]
+  output_schema: [result, steps]
+  needs_clarification: false
+
+- code: compute_currency
+  name: แปลงสกุลเงิน
+  route: tool_only
+  required_tools: [math]
+  output_schema: [converted_amount, rate]
+  needs_clarification: false
+
+- code: compute_unit
+  name: แปลงหน่วย
+  route: tool_only
+  required_tools: [math]
+  output_schema: [result_unit]
+  needs_clarification: false
+
+# === Workflow 4 ===
+- code: workflow_action
+  name: สร้างงาน
+  route: tool_only
+  required_tools: [workflow_executor]
+  output_schema: [task_id]
+  needs_clarification: false
+
+- code: workflow_update
+  name: อัพเดทงาน
+  route: tool_only
+  required_tools: [workflow_executor]
+  output_schema: [status]
+  needs_clarification: false
+
+- code: workflow_status
+  name: เช็คสถานะงาน
+  route: tool_only
+  required_tools: [workflow_executor]
+  output_schema: [status, details]
+  needs_clarification: false
+
+- code: workflow_assign
+  name: มอบหมายงาน
+  route: tool_only
+  required_tools: [workflow_executor]
+  output_schema: [assignee, task_id]
+  needs_clarification: false
+
+# === Communication 5 ===
+- code: send_communicate
+  name: ส่งข้อความ
+  route: tool_only
+  required_tools: [action_executor]
+  output_schema: [status]
+  needs_clarification: false
+
+- code: send_schedule
+  name: นัดหมาย
+  route: tool_only
+  required_tools: [calendar]
+  output_schema: [event_id, time]
+  needs_clarification: false
+
+- code: send_reminder
+  name: ตั้งเตือน
+  route: tool_only
+  required_tools: [reminder]
+  output_schema: [reminder_id]
+  needs_clarification: false
+
+- code: send_email
+  name: ส่งอีเมล
+  route: tool_only
+  required_tools: [action_executor]
+  output_schema: [email_status]
+  needs_clarification: false
+
+- code: send_line
+  name: ส่งไลน์
+  route: tool_only
+  required_tools: [action_executor]
+  output_schema: [line_status]
+  needs_clarification: false
+
+# === Document 4 ===
+- code: doc_summarize
+  name: สรุปเอกสาร
+  route: tool_then_llm
+  required_tools: [file_parser]
+  output_schema: [summary]
+  needs_clarification: false
+
+- code: doc_extract
+  name: ดึงข้อมูลเอกสาร
+  route: tool_only
+  required_tools: [file_parser]
+  output_schema: [data]
+  needs_clarification: false
+
+- code: doc_translate
+  name: แปลเอกสาร
+  route: tool_only
+  required_tools: [translator]
+  output_schema: [translated_text]
+  needs_clarification: false
+
+- code: doc_create
+  name: สร้างเอกสาร
+  route: tool_only
+  required_tools: [doc_generator]
+  output_schema: [file_url]
+  needs_clarification: false
+
+# === Data 3 ===
+- code: data_chart
+  name: สร้างกราฟ
+  route: tool_only
+  required_tools: [chart_generator]
+  output_schema: [chart_url]
+  needs_clarification: false
+
+- code: data_table
+  name: สร้างตาราง
+  route: tool_only
+  required_tools: [table_generator]
+  output_schema: [table]
+  needs_clarification: false
+
+- code: data_export
+  name: ส่งออกข้อมูล
+  route: tool_only
+  required_tools: [exporter]
+  output_schema: [file_url]
+  needs_clarification: false
+
+# === Code 4 ===
+- code: code_explain
+  name: อธิบายโค้ด
+  route: llm_summary
+  required_tools: []
+  output_schema: [explanation]
+  needs_clarification: false
+
+- code: code_generate
+  name: เขียนโค้ด
+  route: llm_summary
+  required_tools: []
+  output_schema: [code]
+  needs_clarification: false
+
+- code: code_debug
+  name: ช่วยแก้บัค
+  route: llm_summary
+  required_tools: []
+  output_schema: [fix_suggestion]
+  needs_clarification: false
+
+- code: code_refactor
+  name: ปรับปรุงโค้ด
+  route: llm_summary
+  required_tools: []
+  output_schema: [refactored_code]
+  needs_clarification: false
+
+# === System 6 ===
+- code: help_guide
+  name: ช่วยเหลือ
+  route: tool_only
+  required_tools: [fact_retriever]
+  output_schema: [help_text]
+  needs_clarification: false
+
+- code: system_capabilities
+  name: ความสามารถระบบ
+  route: tool_only
+  required_tools: [fact_retriever]
+  output_schema: [capabilities]
+  needs_clarification: false
+
+- code: system_status
+  name: สถานะระบบ
+  route: direct
+  required_tools: []
+  output_schema: [status_report]
+  needs_clarification: false
+
+- code: system_privacy
+  name: นโยบายความเป็นส่วนตัว
+  route: tool_only
+  required_tools: [fact_retriever]
+  output_schema: [privacy_info]
+  needs_clarification: false
+
+- code: system_time
+  name: เช็คเวลา
+  route: direct
+  required_tools: []
+  output_schema: [current_time]
+  needs_clarification: false
+
+- code: knowledge_synthesize
+  name: สังเคราะห์ความรู้
+  route: tool_only
+  required_tools: [knowledge_synthesizer]
+  output_schema: [summary, new_rules_count, file_path]
+  needs_clarification: false
+
+# === Personality 3 ===
+- code: personality_joke
+  name: เล่าเรื่องตลก
+  route: llm_summary
+  required_tools: []
+  output_schema: [joke]
+  needs_clarification: false
+
+- code: personality_change
+  name: เปลี่ยนบุคลิก
+  route: direct
+  required_tools: []
+  output_schema: [status]
+  needs_clarification: false
+
+- code: personality_chat
+  name: ชวนคุยเล่น
+  route: direct
+  required_tools: []
+  output_schema: [response]
+  needs_clarification: false
+
+# === Specialist 3 ===
+- code: name_numerology
+  name: วิเคราะห์เลขศาสตร์ชื่อ
+  route: tool_only
+  required_tools: [name_analyzer]
+  output_schema: [result, breakdown]
+  needs_clarification: false
+
+- code: astrology_analysis
+  name: ผูกดวง 3 ระบบ
+  route: tool_only
+  required_tools: [astrology_analyzer]
+  output_schema: [bazi, western, vedic, harmony]
+  needs_clarification: false
+
+- code: qa_tax_calculation
+  name: คำนวณภาษี
+  route: tool_only
+  required_tools: [tax_calculator]
+  output_schema: [tax_payable, net_income, breakdown]
+  needs_clarification: false
+
+# === Fallback 1 ===
+- code: unknown
+  name: ไม่รู้
+  route: clarifier
+  required_tools: []
+  output_schema: [message]
+  needs_clarification: true

@@ -1,0 +1,48 @@
+- intent: "greeting"
+  patterns: ["^(สวัสดี|หวัดดี|เฮโล|ฮัลโหล|ไฮ).*", "ทักทาย.*", "^(hi|hello|hey).*", "สบายดีไหม"]
+  match_any: true
+  confidence_boost: 0.85
+  route: "direct"
+  tools: []
+  priority: 10
+
+- intent: "clarify"
+  patterns: ["หมายความว่า.*อย่างไร", "หมายถึง.*อย่างไร", "คำนี้.*หมายถึงอะไร", "can you.*clarify.*", "ไม่แน่ใจว่า.*หมายถึง.*อะไร", "คือ.*หมายถึงอะไร.*"]
+  match_any: true
+  confidence_boost: 0.85
+  route: "clarifier"
+  tools: []
+  priority: 6
+
+- intent: "workflow_action"
+  patterns: ["สร้างตั๋ว.*ให้ที", "เปิดงาน.*ใหม่.*ให้หน่อย", "แจ้ง incident.*", "create.*ticket.*", "เปิดตั๋ว.*ให้ทีนะ", "ต้องการให้ส่งต่อ.*"]
+  match_any: true
+  confidence_boost: 0.90
+  route: "tool_only"
+  tools: ["workflow_executor"]
+  priority: 8
+
+- intent: "multi_intent"
+  patterns: ["ช่วย.*แล้ว.*ก็.*", "ทำ.*อันนี้.*ก่อน.*แล้ว.*ค่อย.*", "first.*then.*also.*", "ขอ.*สองอย่าง.*เลย"]
+  match_any: true
+  confidence_boost: 0.75
+  route: "multi_router"
+  tools: []
+  priority: 5
+
+- intent: "unknown"
+  patterns: [".*"]
+  match_any: true
+  confidence_boost: 0.1
+  route: "unknown_fallback"
+  tools: []
+  priority: 1
+  note: "Fallback สุดท้าย!"
+
+- intent: "custom_yourai"
+  patterns: ["สร้าง.*เอไอ.*ของ.*วอ", "สอน.*ฉัน.*ทำ.*โมเดล", "สร้าง.*เอไอ.*ไม่.*พึ่ง.*คนอื่น", "build.*my.*own.*ai.*model"]
+  match_any: true
+  confidence_boost: 0.98
+  route: "tool_then_llm"
+  tools: ["ai_builder"]
+  priority: 10

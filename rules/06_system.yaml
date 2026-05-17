@@ -1,0 +1,31 @@
+- intent: "safety_check"
+  patterns: ["ตรวจ.*เนื้อหา.*เสี่ยง", "ตรวจ.*ความไม่เหมาะสม", "check.*for.*safety", "is this.*appropriate.*"]
+  match_any: true
+  confidence_boost: 0.93
+  route: "tool_only"
+  tools: ["safety_checker"]
+  priority: 9
+
+- intent: "compliance_review"
+  patterns: ["ตรวจ.*ว่าถูกต้องตาม.*กฎ", "สัญญา.*นี้.*ผิด.*ระเบียบ.*ไหม", "check.*compliance.*with.*"]
+  match_any: true
+  confidence_boost: 0.93
+  route: "tool_only"
+  tools: ["compliance_engine"]
+  priority: 9
+
+- intent: "auth_quota_check"
+  patterns: ["ฉัน.*มีสิทธิ์.*ทำ.*ไหม", "โควตา.*เหลือ.*เท่าไร", "check.*my.*quota", "do I have.*permission.*to"]
+  match_any: true
+  confidence_boost: 0.92
+  route: "tool_only"
+  tools: ["auth_enforcer"]
+  priority: 9
+
+- intent: "classify_text"
+  patterns: ["จัดหมวด.*ข้อความ.*นี้", "นี่คือ.*ประเภท.*ไหน", "classify.*this.*text.*as"]
+  match_any: true
+  confidence_boost: 0.88
+  route: "tool_only"
+  tools: ["classifier"]
+  priority: 7

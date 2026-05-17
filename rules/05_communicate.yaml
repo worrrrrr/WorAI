@@ -1,0 +1,23 @@
+- intent: "send_communicate"
+  patterns: ["ส่ง.*เมล.*ให้.*", "ส่งอีเมล.*ให้.*", "ส่งข้อความ.*บอกว่า.*", "แจ้ง.*ผ่าน.*Slack", "post.*message.*to.*channel", "send.*email.*to.*", "ส่งต่อ.*ให้ที"]
+  match_any: true
+  confidence_boost: 0.88
+  route: "tool_only"
+  tools: ["messaging_executor"]
+  priority: 7
+
+- intent: "translate"
+  patterns: ["แปล.*เป็น.*ภาษา", "ภาษาอังกฤษ.*คำว่า.*", "translate.*to.*Thai", "คำนี้.*ภาษาจีน.*พูดว่า"]
+  match_any: true
+  confidence_boost: 0.95
+  route: "tool_only"
+  tools: ["translator"]
+  priority: 8
+
+- intent: "rewrite_tone"
+  patterns: ["เขียนใหม่.*ด้วยโทน.*(สุภาพ|มืออาชีพ)", "ปรับ.*ให้ดูเป็นมืออาชีพ", "rewrite.*in.*a.*professional.*"]
+  match_any: true
+  confidence_boost: 0.84
+  route: "tool_only"
+  tools: ["rewriter"]
+  priority: 6

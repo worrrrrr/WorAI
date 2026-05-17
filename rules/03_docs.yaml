@@ -1,0 +1,31 @@
+- intent: "doc_summarize"
+  patterns: ["สรุป.*รายงาน.*หน่อย", "ย่อ.*เอกสาร.*ให้หน่อย", "one.*pager.*overview", "key.*points.*from.*"]
+  match_any: true
+  confidence_boost: 0.88
+  route: "file_analysis"
+  tools: ["file_parser", "summarizer"]
+  priority: 7
+
+- intent: "doc_extract"
+  patterns: ["มีข้อมูล.*อะไรบ้าง", "ดึง.*ชื่อลูกค้า.*จากไฟล์", "extract.*information.*from.*"]
+  match_any: true
+  confidence_boost: 0.85
+  route: "file_analysis"
+  tools: ["file_parser", "extractor"]
+  priority: 7
+
+- intent: "doc_analyze"
+  patterns: ["วิเคราะห์.*เอกสาร.*", "จุด.*เสี่ยง.*คืออะไร", "ตรวจ.*ข้อตกลง.*", "review.*contract.*for risk"]
+  match_any: true
+  confidence_boost: 0.90
+  route: "file_analysis"
+  tools: ["file_parser", "chunker", "summarizer"]
+  priority: 7
+
+- intent: "doc_compare"
+  patterns: ["เปรียบเทียบ.*เอกสาร.*2 .*ฉบับ", "diff.*between.*two.*documents", "compare.*version.*A.*and.*B"]
+  match_any: true
+  confidence_boost: 0.89
+  route: "file_analysis"
+  tools: ["file_parser", "doc_comparator"]
+  priority: 7

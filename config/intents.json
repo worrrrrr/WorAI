@@ -1,0 +1,396 @@
+[
+  {
+    "code": "qa_factual",
+    "name": "ถามข้อมูลตรง",
+    "route": "direct",
+    "required_tools": [
+      "fact_retriever"
+    ],
+    "output_schema": [
+      "answer",
+      "source"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "qa_opinion",
+    "name": "ขอความคิดเห็น",
+    "route": "llm_summary",
+    "required_tools": [],
+    "output_schema": [
+      "opinion",
+      "reasons"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "qa_comparative",
+    "name": "เปรียบเทียบ",
+    "route": "tool_then_llm",
+    "required_tools": [
+      "comparator"
+    ],
+    "output_schema": [
+      "compare_table",
+      "summary"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "doc_summarize",
+    "name": "สรุปเอกสาร",
+    "route": "file_analysis",
+    "required_tools": [
+      "file_parser",
+      "summarizer"
+    ],
+    "output_schema": [
+      "summary",
+      "key_points"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "doc_extract",
+    "name": "ดึงข้อมูลจากเอกสาร",
+    "route": "file_analysis",
+    "required_tools": [
+      "file_parser",
+      "extractor"
+    ],
+    "output_schema": [
+      "entities"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "doc_analyze",
+    "name": "วิเคราะห์เอกสารยาว",
+    "route": "file_analysis",
+    "required_tools": [
+      "file_parser",
+      "chunker",
+      "summarizer"
+    ],
+    "output_schema": [
+      "summary",
+      "risks"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "doc_compare",
+    "name": "เปรียบเทียบเอกสาร",
+    "route": "file_analysis",
+    "required_tools": [
+      "file_parser",
+      "doc_comparator"
+    ],
+    "output_schema": [
+      "diff",
+      "risk"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "search_web",
+    "name": "ค้นหาจากเว็บ",
+    "route": "direct_search",
+    "required_tools": [
+      "web_search"
+    ],
+    "output_schema": [
+      "links",
+      "snippet"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "search_knowledge",
+    "name": "ค้นหาความรู้ภายใน",
+    "route": "direct_search",
+    "required_tools": [
+      "kb_retriever"
+    ],
+    "output_schema": [
+      "answer",
+      "source"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "search_database",
+    "name": "สอบถามฐานข้อมูล",
+    "route": "tool_only",
+    "required_tools": [
+      "db_executor"
+    ],
+    "output_schema": [
+      "table",
+      "summary"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "code_generate",
+    "name": "เขียนโค้ด",
+    "route": "tool_then_llm",
+    "required_tools": [
+      "code_generator"
+    ],
+    "output_schema": [
+      "code",
+      "explanation"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "code_debug",
+    "name": "วิเคราะห์/แก้ error",
+    "route": "tool_then_llm",
+    "required_tools": [
+      "code_analyzer"
+    ],
+    "output_schema": [
+      "issue",
+      "fix"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "compute_simple",
+    "name": "คำนวณเลข",
+    "route": "tool_only",
+    "required_tools": [
+      "calculator"
+    ],
+    "output_schema": [
+      "result"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "data_analyze",
+    "name": "วิเคราะห์ข้อมูล",
+    "route": "tool_then_llm",
+    "required_tools": [
+      "data_analyzer"
+    ],
+    "output_schema": [
+      "summary",
+      "insights"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "data_visualize",
+    "name": "สร้างกราฟ",
+    "route": "tool_only",
+    "required_tools": [
+      "visualizer"
+    ],
+    "output_schema": [
+      "chart"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "translate",
+    "name": "แปลภาษา",
+    "route": "tool_only",
+    "required_tools": [
+      "translator"
+    ],
+    "output_schema": [
+      "translated_text"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "rewrite_tone",
+    "name": "ปรับโทน",
+    "route": "tool_only",
+    "required_tools": [
+      "rewriter"
+    ],
+    "output_schema": [
+      "rewritten_text"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "classify_text",
+    "name": "จัดหมวดข้อความ",
+    "route": "tool_only",
+    "required_tools": [
+      "classifier"
+    ],
+    "output_schema": [
+      "labels"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "safety_check",
+    "name": "ตรวจความปลอดภัย",
+    "route": "tool_only",
+    "required_tools": [
+      "safety_checker"
+    ],
+    "output_schema": [
+      "status"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "compliance_review",
+    "name": "ตรวจ compliance",
+    "route": "tool_only",
+    "required_tools": [
+      "compliance_engine"
+    ],
+    "output_schema": [
+      "status",
+      "issues"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "workflow_action",
+    "name": "สร้างงาน/ตั๋ว",
+    "route": "tool_only",
+    "required_tools": [
+      "workflow_executor"
+    ],
+    "output_schema": [
+      "task_id"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "send_communicate",
+    "name": "ส่งข้อความ/เมล",
+    "route": "tool_only",
+    "required_tools": [
+      "messaging_executor"
+    ],
+    "output_schema": [
+      "status"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "escalate_handoff",
+    "name": "ส่งต่อให้คน",
+    "route": "human_handoff",
+    "required_tools": [],
+    "output_schema": [
+      "message"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "auth_quota_check",
+    "name": "ตรวจสอบสิทธิ์",
+    "route": "tool_only",
+    "required_tools": [
+      "auth_enforcer"
+    ],
+    "output_schema": [
+      "status"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "infra_run",
+    "name": "สั่ง infra/run job",
+    "route": "tool_only",
+    "required_tools": [
+      "infra_executor"
+    ],
+    "output_schema": [
+      "status"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "clarify",
+    "name": "คำถามก้ำกึ่ง",
+    "route": "clarifier",
+    "required_tools": [],
+    "output_schema": [
+      "question"
+    ],
+    "needs_clarification": true
+  },
+  {
+    "code": "greeting",
+    "name": "ทักทาย",
+    "route": "direct",
+    "required_tools": [],
+    "output_schema": [
+      "response"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "multi_intent",
+    "name": "มีหลายงานในคำเดียว",
+    "route": "multi_router",
+    "required_tools": [],
+    "output_schema": [
+      "subtasks"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "unknown",
+    "name": "intent ไม่รู้",
+    "route": "unknown_fallback",
+    "required_tools": [],
+    "output_schema": [
+      "message"
+    ],
+    "needs_clarification": true
+  },
+  {
+    "code": "custom_yourai",
+    "name": "สร้าง AI ของวอ",
+    "route": "tool_then_llm",
+    "required_tools": [
+      "ai_builder"
+    ],
+    "output_schema": [
+      "plan"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "name_numerology",
+    "name": "วิเคราะห์เลขศาสตร์ชื่อ",
+    "route": "tool_only",
+    "required_tools": [
+      "name_analyzer"
+    ],
+    "output_schema": [
+      "result",
+      "breakdown"
+    ],
+    "needs_clarification": false
+  },
+  {
+    "code": "astrology_analysis",
+    "name": "ผูกดวง 3 ระบบ",
+    "route": "tool_only",
+    "required_tools": [
+      "astrology_analyzer"
+    ],
+    "output_schema": [
+      "bazi",
+      "western",
+      "vedic",
+      "harmony"
+    ],
+    "needs_clarification": false
+  }
+]
