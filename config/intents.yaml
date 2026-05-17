@@ -339,6 +339,13 @@
   output_schema: [summary, new_rules_count, file_path]
   needs_clarification: false
 
+- code: cli_help
+  name: ช่วยเหลือคำสั่ง CLI
+  route: tool_only
+  required_tools: [fact_retriever]
+  output_schema: [help_text]
+  needs_clarification: false
+
 # === Personality 3 ===
 - code: personality_joke
   name: เล่าเรื่องตลก

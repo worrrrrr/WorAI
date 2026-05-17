@@ -2,6 +2,15 @@
 # Priority: 10=สูงสุด 1=ต่ำสุด | Router จะเลือก intent ที่ confidence สูงสุด + priority สูงสุด
 
 # ========== Priority 10: Critical System ==========
+- intent: cli_help
+  patterns:
+    - "^/help$"
+  match_any: true
+  confidence_boost: 0.99
+  route: tool_only
+  tools: [fact_retriever]
+  priority: 10
+
 - intent: greeting
   patterns: 
     - "^(สวัสดี|หวัดดี|hi|hello|ดีจ้า|โย่ว|ทักทาย|ฮัลโหล|ไง|สบายดีไหม)$"
