@@ -82,6 +82,54 @@ ELEMENT_CYCLE = ["Wood", "Fire", "Earth", "Metal", "Water"]
 ELEMENT_PRODUCES = {"Wood": "Fire", "Fire": "Earth", "Earth": "Metal", "Metal": "Water", "Water": "Wood"}
 ELEMENT_OVERCOMES = {"Wood": "Earth", "Earth": "Water", "Water": "Fire", "Fire": "Metal", "Metal": "Wood"}
 
+# --- Element Thai names ---
+ELEMENT_TH = {"Wood": "ไม้", "Fire": "ไฟ", "Earth": "ดิน", "Metal": "ทอง", "Water": "น้ำ"}
+
+# --- Seasonal Strength Map (เดือนจีน -> คะแนนธาตุ) ---
+# เดือน酉 (Rooster) =  Metal 旺, Water 相, Earth 休, Fire 囚, Wood 死
+SEASON_STRENGTH = {
+    '寅': {'Wood': 100, 'Fire': 70, 'Earth': 30, 'Metal': 0, 'Water': 0},   # Tiger - Spring
+    '卯': {'Wood': 100, 'Fire': 70, 'Earth': 30, 'Metal': 0, 'Water': 0},   # Rabbit - Spring
+    '辰': {'Earth': 100, 'Metal': 70, 'Fire': 30, 'Water': 0, 'Wood': 0},   # Dragon - Late Spring
+    '巳': {'Fire': 100, 'Earth': 70, 'Metal': 30, 'Wood': 0, 'Water': 0},   # Snake - Summer
+    '午': {'Fire': 100, 'Earth': 70, 'Metal': 30, 'Wood': 0, 'Water': 0},   # Horse - Summer
+    '未': {'Earth': 100, 'Metal': 70, 'Fire': 30, 'Water': 0, 'Wood': 0},   # Goat - Late Summer
+    '申': {'Metal': 100, 'Water': 70, 'Earth': 30, 'Fire': 0, 'Wood': 0},   # Monkey - Autumn
+    '酉': {'Metal': 100, 'Water': 70, 'Earth': 30, 'Fire': 0, 'Wood': 0},   # Rooster - Autumn
+    '戌': {'Earth': 100, 'Metal': 70, 'Fire': 30, 'Water': 0, 'Wood': 0},   # Dog - Late Autumn
+    '亥': {'Water': 100, 'Wood': 70, 'Metal': 30, 'Fire': 0, 'Earth': 0},   # Pig - Winter
+    '子': {'Water': 100, 'Wood': 70, 'Metal': 30, 'Fire': 0, 'Earth': 0},   # Rat - Winter
+    '丑': {'Earth': 100, 'Metal': 70, 'Water': 30, 'Fire': 0, 'Wood': 0},   # Ox - Late Winter
+}
+
+# --- Branch to Element mapping ---
+BRANCH_ELEMENT_MAP = {
+    '子': 'Water', '丑': 'Earth', '寅': 'Wood', '卯': 'Wood', '辰': 'Earth', '巳': 'Fire',
+    '午': 'Fire', '未': 'Earth', '申': 'Metal', '酉': 'Metal', '戌': 'Earth', '亥': 'Water'
+}
+
+# --- Stem to Element mapping ---
+STEM_ELEMENT_MAP = {
+    '甲': 'Wood', '乙': 'Wood', '丙': 'Fire', '丁': 'Fire', '戊': 'Earth',
+    '己': 'Earth', '庚': 'Metal', '辛': 'Metal', '壬': 'Water', '癸': 'Water'
+}
+
+# --- Hidden Stems in each Branch ---
+HIDDEN_STEMS_MAP = {
+    '子': ['癸'],
+    '丑': ['己', '癸', '辛'],
+    '寅': ['甲', '丙', '戊'],
+    '卯': ['乙'],
+    '辰': ['戊', '乙', '癸'],
+    '巳': ['丙', '庚', '戊'],
+    '午': ['丁', '己'],
+    '未': ['己', '丁', '乙'],
+    '申': ['庚', '壬', '戊'],
+    '酉': ['辛'],
+    '戌': ['戊', '辛', '丁'],
+    '亥': ['壬', '甲']
+}
+
 # --- Thai solar month mapping for Bazi month pillar (approximate) ---
 # Bazi month branch changes at solar terms (节气), simplified here to ~4-5th of each month
 MONTH_BRANCH_START = [7, 8, 9, 10, 11, 0, 1, 2, 3, 4, 5, 6]  # Jan=子, Feb=丑... wait Bazi month starts at 寅
@@ -209,22 +257,189 @@ def _calculate_bazi(year: int, month: int, day: int, hour: int, minute: int = 0)
 
 
 def _get_hidden_stems(branch_idx: int) -> List[str]:
-    """Hidden stems inside earthly branches (simplified mapping)."""
-    hidden = {
-        0: ["癸 Gui"],    # 子
-        1: ["己 Ji", "癸 Gui", "辛 Xin"],  # 丑
-        2: ["甲 Jia", "丙 Bing", "戊 Wu"],  # 寅
-        3: ["乙 Yi"],    # 卯
-        4: ["戊 Wu", "乙 Yi", "癸 Gui"],  # 辰
-        5: ["丙 Bing", "庚 Geng", "戊 Wu"],  # 巳
-        6: ["丁 Ding", "己 Ji"],  # 午
-        7: ["己 Ji", "丁 Ding", "乙 Yi"],  # 未
-        8: ["庚 Geng", "壬 Ren", "戊 Wu"],  # 申
-        9: ["辛 Xin"],   # 酉
-        10: ["戊 Wu", "辛 Xin", "丁 Ding"], # 戌
-        11: ["壬 Ren", "甲 Jia"],  # 亥
-    }
-    return hidden.get(branch_idx, [])
+    """Hidden stems inside earthly branches (using HIDDEN_STEMS_MAP)."""
+    branch_names = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥']
+    if branch_idx < 0 or branch_idx >= 12:
+        return []
+    branch_name = branch_names[branch_idx]
+    return HIDDEN_STEMS_MAP.get(branch_name, [])
+
+
+class BaziAnalyzer:
+    """Advanced Bazi Analyzer with Sin-sae rules (虛不受生，生多為克，強不受克，母慈滅子)."""
+    
+    def __init__(self, year: int, month: int, day: int, hour: int, minute: int = 0):
+        self.year = year
+        self.month = month
+        self.day = day
+        self.hour = hour
+        self.minute = minute
+        self.bazi_data = _calculate_bazi(year, month, day, hour, minute)
+        self.pillars = self.bazi_data['pillars']
+        self.day_master = self.bazi_data['day_master']['element']
+        self.day_master_stem = self.bazi_data['day_master']['stem'].split()[0]
+        self.month_branch = self.pillars['month']['branch'].split()[0]
+        
+    def _get_element_strength_score(self, element: str) -> int:
+        """Calculate element strength score (0-200) based on season, roots, and stems."""
+        score = 0
+        
+        # 1. Seasonal strength (เดือนจีน -> คะแนน)
+        season_scores = SEASON_STRENGTH.get(self.month_branch, {})
+        score += season_scores.get(element, 0)
+        
+        # 2. Root count in Earthly Branches (地支)
+        branch_names = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥']
+        root_count = 0
+        for pillar_data in self.pillars.values():
+            branch_char = pillar_data['branch'].split()[0]
+            if BRANCH_ELEMENT_MAP.get(branch_char) == element:
+                root_count += 1
+            # Also check hidden stems
+            hidden = HIDDEN_STEMS_MAP.get(branch_char, [])
+            for stem_char in hidden:
+                if STEM_ELEMENT_MAP.get(stem_char) == element:
+                    root_count += 0.5  # Hidden stem counts half
+        score += int(root_count * 30)
+        
+        # 3. Stem count in Heavenly Stems (天干)
+        stem_count = 0
+        for pillar_data in self.pillars.values():
+            stem_char = pillar_data['stem'].split()[0]
+            if STEM_ELEMENT_MAP.get(stem_char) == element:
+                stem_count += 1
+        score += stem_count * 20
+        
+        return min(score, 200)  # Cap at 200
+    
+    def _check_generation_valid(self, from_ele: str, to_ele: str) -> tuple:
+        """Check if generation (ส่งพล) is valid based on 虛不受生 and 生多為克 rules."""
+        from_score = self._get_element_strength_score(from_ele)
+        to_score = self._get_element_strength_score(to_ele)
+        
+        # Rule 1: 虛不受生 - ตัวส่งพลอ่อนเกินไป ส่งพลไม่ได้
+        if from_score < to_score - 60:
+            return False, f"ธาตุ{ELEMENT_TH.get(from_ele)} {from_score} แต้ม อ่อนเกินไป ส่งพลให้ธาตุ{ELEMENT_TH.get(to_ele)} {to_score} แต้มไม่ไหว = 虛不受生 (ไม่มีเชื้อไฟ ไม่มีคนช่วย ต้องจุดเอง)"
+        
+        # Rule 2: 生多為克 - ตัวส่งพลเยอะเกิน กลายเป็นพิฆาต
+        if to_score > 0 and from_score > to_score * 3:
+            return False, f"ธาตุ{ELEMENT_TH.get(from_ele)} {from_score} แต้ม ท่วมธาตุ{ELEMENT_TH.get(to_ele)} {to_score} แต้ม = 生多為克 (แม่รักลูกจนสำลัก คนช่วยเยอะแต่ช่วยผิดทาง)"
+        
+        return True, f"ส่งพลได้ปกติ ({from_ele} {from_score} แต้ม → {to_ele} {to_score} แต้ม)"
+    
+    def _check_control_valid(self, controller: str, target: str) -> tuple:
+        """Check if control (พิฆาต) is valid based on 強不受克 rule."""
+        controller_score = self._get_element_strength_score(controller)
+        target_score = self._get_element_strength_score(target)
+        
+        # Rule 3: 強不受ข克 - Target แข็งเกินไป พิฆาตไม่ได้
+        if target_score > controller_score * 2:
+            return False, f"ธาตุ{ELEMENT_TH.get(controller)} {controller_score} แต้ม พิฆาตธาตุ{ELEMENT_TH.get(target)} {target_score} แต้มไม่เข้า = 強不受ข克 (คุณแข็งกว่า แรงกดดันทำอะไรไม่ได้)"
+        
+        # Rule 4: 母慈滅子 - ถ้า target อ่อนเกินไป โดนพิฆาตง่าย
+        if target_score < 30 and controller_score > 50:
+            return True, f"ธาตุ{ELEMENT_TH.get(controller)} {controller_score} แต้ม พิฆาตธาตุ{ELEMENT_TH.get(target)} {target_score} แต้มเต็มๆ = 母慈滅子 (โดนกดขี่หนัก)"
+        
+        return True, f"พิฆาตปกติ ({controller} {controller_score} แต้ม → {target} {target_score} แต้ม)"
+    
+    def _analyze_interactions_v2(self) -> List[str]:
+        """Analyze all element interactions with Day Master using Sin-sae rules."""
+        results = []
+        day_score = self._get_element_strength_score(self.day_master)
+        
+        # Determine strength level
+        if day_score < 30:
+            strength_level = "อ่อนวิกฤต"
+        elif day_score < 60:
+            strength_level = "อ่อน"
+        elif day_score < 100:
+            strength_level = "ปานกลาง"
+        elif day_score < 150:
+            strength_level = "แข็ง"
+        else:
+            strength_level = "แข็งมาก"
+        
+        results.append(f"**วิเคราะห์กำลังธาตุ: {self.day_master_stem} {ELEMENT_TH.get(self.day_master)} = {day_score} แต้ม [{strength_level}]**")
+        
+        # Breakdown score components
+        season_scores = SEASON_STRENGTH.get(self.month_branch, {})
+        results.append(f"- ฤดู: เกิดเดือน{self.month_branch} {'ไฟตาย' if self.day_master == 'Fire' and season_scores.get('Fire', 0) == 0 else ''} = {season_scores.get(self.day_master, 0)} แต้ม")
+        
+        # Count roots
+        branch_names = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥']
+        root_count = sum(1 for p in self.pillars.values() if BRANCH_ELEMENT_MAP.get(p['branch'].split()[0]) == self.day_master)
+        results.append(f"- ราก: {'ไม่มีราก' if root_count == 0 else f'{root_count} ราก'}ใน地支 = {root_count * 30} แต้ม")
+        
+        # Count stems
+        stem_count = sum(1 for p in self.pillars.values() if STEM_ELEMENT_MAP.get(p['stem'].split()[0]) == self.day_master)
+        results.append(f"- ฟ้า: {'มี' if stem_count > 0 else 'ไม่มี'}ไฟ{self.day_master_stem}บนฟ้า = {stem_count * 20} แต้ม")
+        
+        summary_msg = "ไฟเท่าตะเกียง ลมพัดก็ดับ" if self.day_master == 'Fire' and day_score < 30 else ""
+        if summary_msg:
+            results.append(f"- สรุป: {summary_msg}")
+        
+        results.append("")
+        results.append("**ตรวจสอบวงจรธาตุ:**")
+        
+        # Check all elements
+        for ele in ['Wood', 'Fire', 'Earth', 'Metal', 'Water']:
+            if ele == self.day_master:
+                continue
+            
+            ele_score = self._get_element_strength_score(ele)
+            if ele_score == 0 and self.day_master != ele:
+                # Still report if it should generate but can't
+                if ELEMENT_PRODUCES.get(ele) == self.day_master:
+                    results.append(f"- ธาตุ{ELEMENT_TH.get(ele)}→{ELEMENT_TH.get(self.day_master)}: {ELEMENT_TH.get(ele)} 0 แต้ม ส่งพลให้ {ELEMENT_TH.get(self.day_master)} {day_score} แต้มไม่ได้ = 虛不受生 ไม่มีเชื้อไฟ ไม่มีคนช่วย ต้องจุดเอง")
+                continue
+            
+            # Check generation (ส่งพล)
+            if ELEMENT_PRODUCES.get(ele) == self.day_master:
+                valid, reason = self._check_generation_valid(ele, self.day_master)
+                results.append(f"- ธาตุ{ELEMENT_TH.get(ele)}→{ELEMENT_TH.get(self.day_master)}: {reason}")
+            
+            # Check control (พิฆาต)
+            elif ELEMENT_OVERCOMES.get(ele) == self.day_master:
+                valid, reason = self._check_control_valid(ele, self.day_master)
+                results.append(f"- ธาตุ{ELEMENT_TH.get(ele)}→{ELEMENT_TH.get(self.day_master)}: {reason}")
+            
+            # Check drain (ถูกดูด)
+            elif ELEMENT_PRODUCES.get(self.day_master) == ele:
+                if day_score < 30 and ele_score > 50:
+                    results.append(f"- ธาตุ{ELEMENT_TH.get(self.day_master)}→{ELEMENT_TH.get(ele)}: ไฟอ่อน {day_score} แต้ม ถ่ายเทให้{ELEMENT_TH.get(ele)} {ele_score} แต้มไม่ไหว = ไม่มีผลงาน เหนื่อยฟรี")
+                else:
+                    results.append(f"- ธาตุ{ELEMENT_TH.get(self.day_master)}→{ELEMENT_TH.get(ele)}: ถ่ายเทปกติ (สร้างผลงาน)")
+            
+            # Check wealth (สิ่งที่คุม)
+            elif ELEMENT_OVERCOMES.get(self.day_master) == ele:
+                if day_score < 30 and ele_score > 50:
+                    results.append(f"- ธาตุ{ELEMENT_TH.get(self.day_master)}→{ELEMENT_TH.get(ele)}: ไฟอ่อน {day_score} แต้ม คุม{ELEMENT_TH.get(ele)} {ele_score} แต้มไม่อยู่ = ทรัพย์เยอะแต่รับไม่ไหว")
+                else:
+                    results.append(f"- ธาตุ{ELEMENT_TH.get(self.day_master)}→{ELEMENT_TH.get(ele)}: คุมทรัพย์ปกติ")
+        
+        return results
+    
+    def get_sin_sae_summary(self) -> str:
+        """Generate full Sin-sae reading with advanced rules."""
+        lines = self._analyze_interactions_v2()
+        
+        day_score = self._get_element_strength_score(self.day_master)
+        
+        # Add final conclusion
+        lines.append("")
+        lines.append("**บทสรุปซินแส:**")
+        
+        if self.day_master == 'Fire' and day_score < 30:
+            lines.append("ดวงนี้คือ \"ไฟใต้มหาสมุทร\" มีทองรอให้หลอม แต่ไม่มีฟืน ไม่มีลม ไม่มีอะไรเลย")
+            lines.append("ต้องระเบิดตัวเองเป็นเชื้อไฟ ถึงจะรอด ถ้ารอดได้จะหลอมทองเป็นอาวุธเทพ")
+        elif day_score < 50:
+            lines.append(f"ดวงอ่อน ต้องพึ่งตัวเอง 100% อย่าหวังใครช่วย")
+        elif day_score > 150:
+            lines.append(f"ดวงแข็งมาก ดื้อรั้น สูงส่ง แต่โดดเดี่ยว")
+        else:
+            lines.append(f"ดวงสมดุล ชีวิตราบรื่น มีคนช่วย但也有อุปสรรค")
+        
+        return "\n".join(lines)
 
 
 def _calculate_western(year: int, month: int, day: int, hour: int, minute: int, lat: float = 13.7563, lon: float = 100.5018) -> Dict[str, Any]:
@@ -856,12 +1071,27 @@ def _get_sinsae_meaning(query: str) -> str:
     return ""
 
 def _generate_sinsae_reading(summary: Dict) -> str:
-    """Combine all data into a cohesive professional Sin-sae consultation."""
+    """Combine all data into a cohesive professional Sin-sae consultation with advanced Wuxing rules."""
     p1 = summary.get("person1", {})
     bazi = p1.get("bazi", {})
     western = p1.get("western", {})
     vedic = p1.get("vedic", {})
     harmony = p1.get("harmony", {}).get("overall_harmony", {})
+    
+    # Use advanced BaziAnalyzer for deep analysis
+    try:
+        birth_info = summary.get("input", {})
+        birth_date = birth_info.get("birth_date", "1992-08-08")
+        birth_time = birth_info.get("birth_time", "12:00")
+        
+        from datetime import datetime as dt_module
+        dt_parsed = dt_module.strptime(birth_date, "%Y-%m-%d")
+        t_parsed = dt_module.strptime(birth_time, "%H:%M")
+        
+        analyzer = BaziAnalyzer(dt_parsed.year, dt_parsed.month, dt_parsed.day, t_parsed.hour, t_parsed.minute)
+        advanced_analysis = analyzer.get_sin_sae_summary()
+    except Exception:
+        advanced_analysis = "ไม่สามารถวิเคราะห์ลึกได้"
     
     dm = bazi.get("day_master", {}).get("stem", "")
     dm_elem = bazi.get("day_master", {}).get("element", "")
@@ -888,6 +1118,10 @@ def _generate_sinsae_reading(summary: Dict) -> str:
     if e_counts.get('Wood', 0) == 0:
         reading += f"⚠️ ข้อสังเกต: ในดวงขาด 'ธาตุไม้' (ความคิดสร้างสรรค์/ความเมตตา) ควรเสริมด้วยการปลูกต้นไม้หรือทำงานศิลปะ\n"
     reading += "\n"
+    
+    # Add advanced Wuxing analysis
+    reading += f"🔮 [วิเคราะห์วงจรธาตุแบบซินแส (กฎเหล็ก 4 ข้อ)]\n"
+    reading += advanced_analysis + "\n\n"
     
     reading += f"☀️ [ภาคสากล - Western Astrology]\n"
     reading += f"ชาวราศี {ZODIAC_TH.get(sun)} (ธาตุ {ELEMENT_TH.get(western['sun_sign']['element'])})\n"
@@ -951,7 +1185,15 @@ def tool_astrology_analyzer(
     if birth_date and len(birth_date) > 15: birth_date = ""
     if birth_time and len(birth_time) > 15: birth_time = ""
 
+    # Thai month mapping
+    THAI_MONTH_MAP = {
+        "มกราคม": 1, "กุมภาพันธ์": 2, "มีนาคม": 3, "เมษายน": 4,
+        "พฤษภาคม": 5, "มิถุนายน": 6, "กรกฎาคม": 7, "สิงหาคม": 8,
+        "กันยายน": 9, "ตุลาคม": 10, "พฤศจิกายน": 11, "ธันวาคม": 12
+    }
+
     if raw_text and not birth_date:
+        # Try DD-MM-YYYY or YYYY-MM-DD format first
         date_match = re.search(r'(\d{1,4})[-/](\d{1,2})[-/](\d{1,4})', raw_text)
         if date_match:
             g1, g2, g3 = date_match.groups()
@@ -959,6 +1201,16 @@ def tool_astrology_analyzer(
             else: d, m, y = int(g1), int(g2), int(g3)
             if y > 2400: y -= 543
             birth_date = f"{y:04d}-{m:02d}-{d:02d}"
+        else:
+            # Try Thai text format: "15 พฤษภาคม 2530"
+            thai_date_match = re.search(r'(\d+)\s+(\S+)\s+(\d+)', raw_text)
+            if thai_date_match:
+                d = int(thai_date_match.group(1))
+                thai_month = thai_date_match.group(2)
+                y = int(thai_date_match.group(3))
+                m = THAI_MONTH_MAP.get(thai_month, 1)
+                if y > 2400: y -= 543
+                birth_date = f"{y:04d}-{m:02d}-{d:02d}"
 
     if raw_text and not birth_time:
         time_match = re.search(r'(\d{1,2})[:.](\d{2})', raw_text)

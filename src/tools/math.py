@@ -68,6 +68,27 @@ def tool_math(
         normalized = re.sub(r"(\d)([a-zA-Z(])", r"\1*\2", normalized)
         normalized = re.sub(r"([a-zA-Z)])(\d)", r"\1*\2", normalized)
 
+        # 3b. Handle Boolean Logic Expressions
+        if any(kw in normalized.upper() for kw in ["AND", "OR", "NOT", "TRUE", "FALSE", "XOR"]):
+            try:
+                from sympy import And, Or, Not, Xor, true, false, symbols
+                # Replace keywords with SymPy equivalents
+                norm_logic = normalized.upper()
+                norm_logic = norm_logic.replace("TRUE", "True").replace("FALSE", "False")
+                norm_logic = norm_logic.replace(" AND ", " & ").replace(" OR ", " | ")
+                norm_logic = norm_logic.replace(" NOT ", " ~")
+                norm_logic = norm_logic.replace(" XOR ", " ^ ")
+                
+                # Evaluate safely
+                result = eval(norm_logic, {"And": And, "Or": Or, "Not": Not, "Xor": Xor, 
+                                           "true": true, "false": false, "True": true, "False": false,
+                                           "&": lambda a, b: And(a, b), "|": lambda a, b: Or(a, b),
+                                           "~": lambda a: Not(a), "^": lambda a, b: Xor(a, b)})
+                return {"success": True, "result": str(bool(result)), "type": "logic"}
+            except Exception as e:
+                logger.error("Logic error: %s", e)
+                return {"success": False, "error": "นิพจน์ตรรกะไม่ถูกต้อง"}
+
         # 4. Equation Solving (if '=' exists)
         if "=" in normalized:
             parts = normalized.split("=", 1)

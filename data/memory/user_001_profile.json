@@ -1,0 +1,48 @@
+{
+  "basic_info": {},
+  "preferences": {
+    "work_style": [
+      {
+        "item": "detail_oriented",
+        "strength": 0.9099999999999999,
+        "count": 2,
+        "first_seen": "2026-05-17T08:14:43.778433"
+      }
+    ]
+  },
+  "personality_traits": {
+    "conscientiousness": {
+      "value": "high",
+      "confidence": 0.32000000000000006,
+      "last_updated": "2026-05-17T08:14:43.779139"
+    },
+    "anxiety_level": {
+      "value": "high",
+      "confidence": 0.13999999999999999,
+      "last_updated": "2026-05-17T08:14:43.779697"
+    }
+  },
+  "conversation_patterns": [
+    {
+      "type": "stress_indicator",
+      "description": "ผมคิดมากเรื่องงานบ่อยๆ กังวลว่าจะผิดพลาด",
+      "frequency": 1,
+      "last_observed": "2026-05-17T08:14:43.779941"
+    },
+    {
+      "type": "consistency_seeker",
+      "description": "prefers_consistent_output",
+      "frequency": 1,
+      "last_observed": "2026-05-17T08:14:43.780200"
+    }
+  ],
+  "important_facts": [
+    {
+      "content": "สวัสดี ผมชื่อต้น ชอบเขียนโค้ดแบบละเอียด ไม่ชุ่ย",
+      "category": "fact",
+      "added_at": "2026-05-17T08:14:43.778565",
+      "reinforced_count": 1
+    }
+  ],
+  "learning_history": []
+}

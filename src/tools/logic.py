@@ -13,10 +13,12 @@ from sympy.logic.boolalg import truth_table
 
 # Optional Dependency: Z3 Solver for complex logical constraints
 try:
-    from z3 import Solver, Bool, BoolRef, And, Or, Not, Implies, sat
+    from z3 import Solver, Bool, And, Or, Not, Implies, sat
+    from z3.z3types import BoolRef
     Z3_AVAILABLE = True
 except ImportError:
     Z3_AVAILABLE = False
+    BoolRef = type(None)  # Fallback type for type hints when Z3 is not available
     logging.warning("Z3 solver not found. Knight/Knave puzzles will use brute force.")
 
 logger = logging.getLogger(__name__)
