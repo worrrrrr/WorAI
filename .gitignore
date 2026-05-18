@@ -1,3 +1,1 @@
-__pycache__/
-*.pyc
-.pytest_cache/
+Nothing should be ignored based on the provided file changes. The modification of 'src/tools/registry.py' represents a standard source code file update, which does not warrant any new entries in the .gitignore file. Therefore, no changes are made to the .gitignore content.
