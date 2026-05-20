@@ -1,4 +1,4 @@
-from typing import Dict, Any, Callable, List
+from typing import Dict, Any, Callable, List, Tuple
 from src.utils import get_logger
 import inspect
 
@@ -21,12 +21,13 @@ class ToolRegistry:
         ToolRegistry._initialized = True
 
         self.tools: Dict[str, Callable] = {}
+        self._tool_modules: Dict[str, Tuple[str, str]] = {}
         self.logger = logger
-        self._auto_register_all()
+        self._register_tool_mappings()
 
-    def _auto_register_all(self):
-        # ชื่อ tool = ชื่อใน intents.yaml | ไฟล์จริง = ชื่อไฟล์ที่มี
-        mapping = {
+    def _register_tool_mappings(self):
+        # เก็บ mapping ไว้ก่อน ยังไม่ import (lazy loading)
+        self._tool_modules = {
             "math": ("src.tools.math", "tool_math"),
             "fact_retriever": ("src.tools.fact_retriever", "tool_fact_retriever"),
             "web_search": ("src.tools.search", "tool_web_search"),
@@ -48,15 +49,31 @@ class ToolRegistry:
             "tax_calculator": ("src.tools.tax_calculator", "tool_tax_calculator"),
             "knowledge_synthesizer": ("src.tools.knowledge_synthesizer", "tool_knowledge_synthesizer"),
         }
+        self.logger.info(f"✅ Registered tool mappings for {len(self._tool_modules)} tools")
 
-        for name, (module_path, func_name) in mapping.items():
-            try:
-                mod = __import__(module_path, fromlist=[func_name])
-                func = getattr(mod, func_name)
-                self.register(name, func)
-            except Exception as e:
-                self.logger.warning(f"{name} not loaded: {e}")
+    def _load_tool(self, tool_name: str) -> bool:
+        """Load tool แบบ lazy เมื่อต้องการใช้"""
+        if tool_name in self.tools:
+            return True
+        
+        if tool_name not in self._tool_modules:
+            self.logger.warning(f"Tool {tool_name} not in mappings")
+            return False
+        
+        try:
+            module_path, func_name = self._tool_modules[tool_name]
+            mod = __import__(module_path, fromlist=[func_name])
+            func = getattr(mod, func_name)
+            self.register(tool_name, func)
+            return True
+        except Exception as e:
+            self.logger.warning(f"{tool_name} not loaded: {e}")
+            return False
 
+    def _auto_register_all(self):
+        # เก็บไว้สำหรับ backward compatibility หรือ debug
+        for tool_name in list(self._tool_modules.keys()):
+            self._load_tool(tool_name)
         self.logger.info(f"✅ Registered {len(self.tools)} tools: {list(self.tools.keys())}")
 
     def register(self, name: str, func: Callable):
@@ -67,9 +84,11 @@ class ToolRegistry:
         if not tool_name:
             return {"success": False, "error": "Tool name is empty or None"}
 
+        # Lazy load tool ถ้ายังไม่ได้โหลด
         if tool_name not in self.tools:
-            self.logger.error(f"Tool {tool_name} not found in registry")
-            return {"success": False, "error": f"Tool {tool_name} not found"}
+            if not self._load_tool(tool_name):
+                self.logger.error(f"Tool {tool_name} not found in registry")
+                return {"success": False, "error": f"Tool {tool_name} not found"}
 
         try:
             func = self.tools[tool_name]
@@ -94,7 +113,7 @@ class ToolRegistry:
             return result if isinstance(result, dict) else {"success": True, "result": result}
 
         except Exception as e:
-            self.logger.error(f"Tool {name} error: {e}", exc_info=True)
+            self.logger.error(f"Tool {tool_name} error: {e}", exc_info=True)
             return {"success": False, "error": str(e)}
 
     def list_tools(self) -> List[str]:

@@ -285,8 +285,15 @@ class ExecutionPlanner:
                 "message": route.clarification_question or "ขอข้อมูลเพิ่มเติมหน่อยครับ"
             }
 
-        # 2. ทักทาย / direct
-        if route.route_type == "direct":
+        # 2. ทักทาย / direct response (Phase 1: Early Exit for greetings)
+        if route.route_type in ["direct", "response"]:
+            # Handle greeting responses directly
+            if route.intent_code == "greeting" and "response" in route.params:
+                return {
+                    "status": "ready",
+                    "response": route.params["response"],
+                    "needs_llm": False
+                }
             res = self._format_output(route.intent_code, {})
             return {
                 "status": "ready",
