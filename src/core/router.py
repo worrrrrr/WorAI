@@ -1,4 +1,4 @@
-import re, os, yaml, pickle, hashlib
+import re, os, yaml, pickle, hashlib, sys
 from typing import Dict, List, Optional, Set, Tuple
 from src.utils import get_logger
 from src.core.types import RouteDecision
@@ -9,6 +9,7 @@ _pattern_cache: Dict[str, re.Pattern] = {}
 _rule_index_cache: Optional[Dict[str, List[int]]] = None  # Keyword -> rule indices mapping
 _config_hash_cache: Optional[str] = None  # Hash of config files for cache invalidation
 _gw_cache: Optional[Dict] = None  # Greeting/quick-win cache
+_config_pickle_cache: Optional[Dict] = None  # Phase 2: Config Pickle Caching
 
 class IntentRouter:
     # Common greetings and direct responses for early exit (Phase 1: Early Exit)
@@ -35,12 +36,15 @@ class IntentRouter:
         self._rules_loaded = False
         self.intent_rules: List[dict] = []
         self._keyword_index: Dict[str, List[int]] = {}  # Phase 2: Rule Indexing
+        self._cache_file = "/tmp/worai_config_cache.pkl"  # Phase 2: Config Pickle Caching
         
-        # Load intents immediately (small file)
-        self._load_intents(intents_path)
+        # Phase 2: Config Pickle Caching - พยายามโหลดจาก cache ก่อน
+        if not self._load_from_pickle_cache():
+            # ถ้าไม่มี cache หรือ cache เก่า โหลดปกติ
+            self._load_intents(intents_path)
         
         # Phase 1: Lazy Load Rules - โหลด rules เมื่อจำเป็นเท่านั้น
-        # ไม่โหลดทันทีตอน init เพื่อลด startup time
+        # ไม่โหลดตอน init เพื่อลด startup time
 
     def _ensure_rules_loaded(self):
         """Phase 1: Lazy Load Rules - โหลด rules เฉพาะเมื่อต้องการใช้"""
@@ -72,6 +76,56 @@ class IntentRouter:
                 with open(path, 'rb') as f:
                     hasher.update(f.read())
         return hasher.hexdigest()
+    
+    def _load_from_pickle_cache(self) -> bool:
+        """Phase 2: Config Pickle Caching - โหลด config จาก pickle cache ถ้ามีและยังใหม่อยู่"""
+        global _config_pickle_cache
+        
+        try:
+            # ตรวจสอบว่า cache file มีอยู่ไหม
+            if not os.path.exists(self._cache_file):
+                self.logger.debug("No pickle cache found")
+                return False
+            
+            # โหลด cache
+            with open(self._cache_file, 'rb') as f:
+                cache_data = pickle.load(f)
+            
+            # ตรวจสอบ version และ hash
+            current_hash = self._compute_config_hash()
+            if cache_data.get('config_hash') != current_hash:
+                self.logger.debug("Cache hash mismatch, rebuilding")
+                return False
+            
+            # ใช้ cache ได้
+            self.intents = cache_data['intents']
+            self.intent_rules = cache_data['intent_rules']
+            self._keyword_index = cache_data.get('keyword_index', {})
+            self._rules_loaded = True
+            
+            self.logger.info(f"✅ Loaded config from pickle cache ({len(self.intents)} intents, {len(self.intent_rules)} rules)")
+            return True
+            
+        except Exception as e:
+            self.logger.debug(f"Pickle cache load failed: {e}")
+            return False
+    
+    def _save_to_pickle_cache(self):
+        """Phase 2: Config Pickle Caching - บันทึก config ลง pickle cache"""
+        try:
+            cache_data = {
+                'config_hash': self._compute_config_hash(),
+                'intents': self.intents,
+                'intent_rules': self.intent_rules,
+                'keyword_index': self._keyword_index
+            }
+            
+            with open(self._cache_file, 'wb') as f:
+                pickle.dump(cache_data, f, protocol=pickle.HIGHEST_PROTOCOL)
+            
+            self.logger.debug(f"Saved config to pickle cache ({self._cache_file})")
+        except Exception as e:
+            self.logger.debug(f"Pickle cache save failed: {e}")
 
     def _build_keyword_index(self):
         """Phase 2: Rule Indexing - สร้าง inverted index จาก keywords ไปยัง rules"""
@@ -133,6 +187,9 @@ class IntentRouter:
         
         # Phase 2: Build keyword index after loading rules
         self._build_keyword_index()
+        
+        # Phase 2: Save to pickle cache after loading
+        self._save_to_pickle_cache()
         
         self.logger.info(f"Loaded {len(self.intent_rules)} rules")
 
